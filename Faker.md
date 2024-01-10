@@ -35,10 +35,7 @@ pa db:seed
 pa migrate:fresh --seed   (if nak fresh)	 
 ``` 
 	
-<br><br><br>
-
-
-
+<br><br>
 
 
 ___
@@ -71,6 +68,6 @@ cth formatters:
     ubah kepada  
   `'faker_locale' => env('FAKER_LOCALE','en_US'),`
 
-  <br>
+  <br><br>
 
   > go to https://fakerphp.github.io/ utk tgk all available language & formatters      
