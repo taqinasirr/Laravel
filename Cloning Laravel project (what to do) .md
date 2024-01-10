@@ -19,4 +19,7 @@ step
 2. rename dia jadi `.env`
 3. pa key:generate
 
-### 2)
+### 2) install required packages (folder vendor)
+
+command - `composer install`
+
