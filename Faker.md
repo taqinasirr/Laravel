@@ -52,7 +52,13 @@ cth formatters:
   * sentence()  
   * slug()  
   * paragraph()  
-  * paragraphs()  
+  * paragraphs()
+  * dateTime()
+  * bank()
+  * bankAccountNumber
+  * myKadNumber()
+  * mobileNumber()
+  * township()
   
   <br>
 
