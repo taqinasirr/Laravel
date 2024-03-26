@@ -1,0 +1,1013 @@
+
+nanti update ni.......
+laravel library
+laravel starter kit
+migration
+ field data type
+.env
+echo+execute html tag
+route model binding 
+query scope
+laravel library - auth  (utk buat authentication)
+upload img
+dapatkan access ke view using middleware    
+ middleware()
+Dapat access bahagian tertentu dlm view
+ can()
+Request class
+ request() 
+loops
+ @foreach ada $loop variable
+ 
+
+------------------------------------------------------------------------------------------------------
+------------------------------------------------------------------------------------------------------
+
+
+4 sekawan
+ -route kat web.php
+ -controller
+ -view
+ -model
+
+  just go to controller utk tgk view & model berkaitan dgn controller tu
+  so file utama yg kita kena tgk adalah controller. dari situ boleh faham kawan2 dia yg lain - view, model, route kat web.php.
+  
+--------------------------------------------------------------------------
+artisan = command line interface included with Laravel
+
+pa
+ make
+   controller CthController --resource
+    //make controller with resource. ada 7:
+    index,create,store,show,edit,update,destroy
+	 show-return view 1 row. kdg2 tak pakai show sebab terus pakai func edit
+   model Cth -rmsfc      r = buat controller jenis resource
+    //pa make:model sebab kita nak create table dulu, pastu barulah -rmsfc
+   factory CthFactory
+   migration 
+     create_cths_table
+	 add_cth_to_cths_table    //add field to existing talbe
+   seeder CthSeeder
+   auth
+ migrate
+   rollback   //jalankan function down() a.k.a drop table yg dah dibuat pakai pa migrate
+   fresh --seed   //jalankan function down() pastu jalankan function up()  
+                  //maksudnya rollback, pastu pa migrate.  pastu pa db:seed
+ db:seed --class=NamaSeeder   
+ serve --port=8001
+ help
+ storage:link
+ route:list
+ tinker
+ list atau pa sahaja  //show all availabe commands
+  
+--------------------------------------------------------------------------
+migration
+ add new field to existing table:
+   pa make:migration add_cth_to_cths_table
+   kat dlm migration file tu:
+	  function up()    ---      $table->string('cth');
+	  function down()  ---      $table->dropColumn('cth');
+   astu pa migrate  lah	  
+	  
+  
+
+
+
+--------------------------------------------------------------------------
+terminal
+ composer       composer detail, version
+ composer -V    composer version
+ php -v         php version
+ laravel        if laravel ada dlm environment, papar laravel installer version
+ ctrl + c       matikan server
+--------------------------------------------------------------------------
+ nak cek laravel version used for this project,
+   go to  composer.json
+--------------------------------------------------------------------------
+file sedia ada dlm new laravel project
+ UserFactory, DatabaseSeeder, Controller,User
+file create sendiri
+ views, folder img css js
+--------------------------------------------------------------------------
+Ekosistem Laravel (sebahagian)
+  Just go to https://laravel.com/   ada pilihan ecosystem kat navbar
+--------------------------------------------------------------------------
+contoh website yg dibuat guna laravel
+  https://www.awwwards.com/websites/laravel/
+--------------------------------------------------------------------------  
+n+1 problem
+ loading - lazy, eager, lazy eager
+ 
+ n+1 prob 
+    lazy loading (default)
+      Model::latest()->get()
+ no n+1 prob
+    1)eager loading 
+         Post::with('author', 'category')->latest()->get()  
+    2)lazy eager loading (pakai ni if guna route model binding)
+	
+-------------------------------------
+contoh camna n+1 berlaku:
+
+ 	Post.php
+       func userghh ---- return $this->belongsTo(User::class)
+	User.php
+       func posts ---- return $this->hasMany(Post::class)	
+	   
+	-------------------------   
+	PostController
+       $posts = Post::all()	
+	   
+	view.blade.php
+	  foreach $posts as $post:
+	 
+	 
+       {{ $post->title }}	     //1 query shj yg berlaku
+	                             //select * from posts.   tak berlaku n+1 lah sebab fetch data dari table sendiri
+								 
+ 	   {{ $post->user->name }}   //fetch data dari table lain. query ikut total row kat table user. so, byk gila
+	                             //select * from users where users.id = 1   
+                                 //select * from users where users.id = 2
+								 //select * from users where users.id = and so on sampai last row
+								 
+	-------------------------
+
+cara utk solve masalh n+1 tu, 
+
+  1) utk eager loading, pakai with():	
+	
+	   $posts = Post::with('userghh')->all()
+	   
+	   {{ $post->user->name }}   //1 query shj yg berlaku
+	                             //select * from users where users.id in (1,2,sampai last id)
+								 
+								 
+		
+    --------------------------
+	 cara tulis fetch dari 2 table
+         Post::with('userghh', 'cthlain')->all()	
+		 
+	---------------------------
+    // boleh jugak set with() kat model siap2. pastu takyah letak with() masa nak fetch
+	    Post.php
+		  protected $with = ['category', 'author'];
+		PostController
+		   xyah letak with.
+        		   
+	
+2)utk lazy eager loading, pakai load():
+    sama je cara mcm eager loading. just tukar with() dgn load()      rasanya lah
+    	
+     							 
+--------------------------------------------------------------------------
+tinker
+  pa:tinker
+  insert & select data pakai terminal
+   Insert
+     Cara1 : create object of that model:
+	      $user = new App\Models\User;
+		  $user = new User;     //aliasing User to App\Models\User
+          $user->field = 'value';
+          $user->save();
+     cara2: 
+          Model::create([
+              'field' = 'value' ,
+              'field' = 'value'
+          ]);
+		  
+   cth select
+     Post::where(‘category_id’, 1)->get() 	
+	 
+  Tinker benefit
+      Testing fetch data. Boleh terus tgk hasil dia kat terminal  
+--------------------------------------------------------------------------
+Eloquent Model
+ crud
+    Insert row
+      create()
+    Select row:
+      all()              //dia tunjuk sekali nama function2 relationship berserta path model (kat terminal)
+	  get()              //sama mcm all() 
+	  latest()->get()           //sama mcm all() cuma urutan start yg latest dulu. wajib buh get()
+	  
+	  with()   
+      find(1)            //find by id
+	  findOrFail(2)      //if tak wujud, keluar exception yg bgtau apa error dia.
+      firstWhere()       //get 1 row shj
+	  where()->first()   //sama mcm firstWhere()  
+      where()->get()     //get semua row yg penuhi kriteria	  
+	  ----------------
+      where('x', '=', 'y')
+	  where('x', 'y')      //sama je dgn yg atas ni
+	  where('x', '>', 10)
+	  
+	  if buat where() shj dia tak jadik apa
+	  dia kena
+	   where()->first()  atau   where()->get()
+	  ----------------------------------------
+    Update row
+      $row()->update()
+      $row->field=value; $row->save()
+    Delete row
+      $row->delete()      //delete berdasarkan mana2 field
+      destroy(1,2,3)      //delete berdasarkan field primary key
+
+      ----------------------------------------
+
+	 Post::latest()->paginate(5)    //paparkan 5 row shj 
+
+    latest()->filter()->paginate()->withQueryString()
+    where('user_id', auth()->user()->id()->get() )
+	
+  cth:	
+  
+  //create//
+    User::create([
+     'name' => 'ali',
+     'password' => bcrypt('123123')
+    ]);
+	-----------------------------------------
+  //select//
+	public function index() {
+       return view('cth', [
+           'categories' => Category::all()
+       ]);
+    }
+	------------------
+    if(request('category')){
+      $category = Category::firstWhere('slug', request('category'));
+      $title = ' in ' . $category->name;
+    }	
+    -----------------------------------------
+  //Update//
+    Model:: find(3)->update(['title' => 'blabla'])
+    -----------------------------------------
+    Post::where('id', $post->id)->update($validatedData);   
+    -----------------------------------------
+	$row = Model::where(fild1, '=', 'value')->first();
+    $row->field3 = 5;
+    $row->save();
+    -----------------------------------------
+  //delete//	
+    $user = User::find(1);
+    $user->delete();
+    ------------------------------------------
+    User::where('x', '>', 10)->delete()
+    ------------------------------------------
+    User::destroy(1,2,3);
+	
+	
+	
+	
+  -------------------------------------------
+  cardinality
+    table kiri ---> table kanan
+  cardinality inverse
+    table kiri <---- table kanan
+  -------------------------------------------
+  table relationship
+   1to1       belongsTo
+   1tomany    hasMany      //aka 1 to n
+  ------------------ 
+   cth set relationship between 2 table
+   	1)kat model Post
+        public function category(){
+          return $this->belongsTo(Category::class);
+        }  		
+	  //cara baca - post belongsTo category
+	  //nama function = nama model nak dihubung
+	  
+    2)kat migration file, create foreignId
+	    $table->foreignId('category_id');  
+		so,     category_id     link to      field id kat table category
+
+	------------------
+    cth guna:
+      $post = Post::first()  // select first post
+      $post->category       // select first post punya category (satu row)
+      $post->category->name  // row tadi tu, kita nak select name shj
+	  
+	  //if pakai sql, kena join table barulah boleh select field dari table lain.
+	  
+	  
+	 ---------------------
+     Eloquent determines the foreign key name by examining the name of the relationship method and suffixing the method name with _id.	 
+	 cth yg tadi, kita pakai category_id
+	 
+	  However, if the foreign key is not category_id, you may pass a custom key name as the second argument to the belongsTo method:
+	  
+	  return $this->belongsTo(Category::class, 'namaforeignkey');
+
+--------------------------------------------------------------------------
+laravel library
+  auth, faker, clockwork, carbon
+  
+  ----------------------------------
+  auth (authentication)
+  ----------------------------------
+  use Illuminate\Support\Facades\Auth;
+  
+  Pkai library ni utk:
+    1. Form validation (xpasti nanti cek)
+       @error('title')   @enderror
+
+    2. Cek user dah login blum
+       - dah login
+            If(auth()->check()){
+                   //Do smthing
+                 }
+       - blum login
+            If(!auth()->check()){
+                   //Do smthing
+                 } 
+ ----------------------------------
+ faker 
+ ----------------------------------
+ Masukkan data ke dlm db (using faker library) :
+
+  1) CthFactory.php
+       'field' =>$this->faker->unique()->name()
+  2)  DatabaseSeeder.php:
+       use \App\Models\Cth;
+       Cth::factory(3)->create()
+  3) pa db:seed
+
+ ----------
+ faker field data type: name() userName() safeEmail() sentence() slug() paragraph() paragraphs() password()
+ 
+ go to https://fakerphp.github.io/ utk tgk formatter yg ada
+ ---------
+ tukar faker ke bahasa melayu
+  1) .env tambah ni FAKER_LOCALE=ms_MY
+  2) config/app.php   'faker_locale' => 'en_US'
+	     ubah kepada: => env('FAKER_LOCALE','en_US'),	
+ 
+ ----------------------------------
+ clockwork 
+ ----------------------------------
+ cek panggil query berapa kali.
+   1)install ke dlm composer.JSON
+       composer require itsgoingd/clockwork
+    2)install chrome plugin (by itsgoingd)	   
+
+----------------------------------	
+ carbon 
+ ----------------------------------
+  - extends PHP's own DateTime class
+  - It provides some nice functionality to deal with dates in PHP. Specifically things like: Dealing with timezones. Getting current time easily.
+    cth cara pakai:   {{ $posts[0]->created_at->diffForHumans() }}
+ 
+--------------------------------------------------------------------------
+laravel starter kit
+  automatically scaffold your application with the routes, controllers, and views you need to register and authenticate your application's users.
+
+  utk authentication
+     breeze
+	   authentification features:
+	     login, registration, password reset, email verification, password confirmation
+		 Breeze includes a simple "profile" page where the user may update their name, email address, and password.
+	 jetstream
+	   features:
+	     login, registration, email verification, two-factor authentication, session management, API via Laravel Sanctum
+	
+	
+	p/s: if taknak pakai starter kit, boleh pakai laravel library called auth 
+	
+--------------------------------------------------------------------------
+laravel package
+  valet
+  
+--------------------------------------------------------------------------
+Seeders:
+ cara 1: pakai faker
+ cara 2: masukkan seed aka data sendiri
+           i)DatabaseSeeder.php
+              Model::create([
+               'cth'=>'blabla',
+	           'cth2'=>'blabla'
+	          ]);
+	 
+           ii) pa db:seed
+  
+--------------------------------------------------------------------------  
+Migration
+  field data type
+    id, foreignId, string, text, longText, timestamp, timestamps, morps
+	  unique, nullable, index
+	  
+  //contoh//
+    $table->id();
+    $table->foreignId('');
+    $table->string('');
+    $table->string('')->unique();
+    $table->string('')->nullable();
+    $table->text('');
+    $table->longText('payload');
+    $table->timestamp()->nullable();  // tunjuk bila dia dipublish
+    $table->timestamps();             // create field created_at dgn updated_at
+    $table->string('email')->unique();
+    $table->morphs('tokenable');
+    $table->string('token', 64)->unique();
+	$table->date('date_of_birth');   //belum test. nanti test
+
+--------------------------------------------------------------------------	
+.env
+  hanya utk developer
+  tersenarai dlm .gitignore
+    so .env ni stay kat local tak gi mana2
+	bila project dah deploy, kena bubuh sendiri .env kat server tu
+  tgh buat sistem
+   APP_ENV=local
+  siap utk release
+    APP_ENV=production
+    bila ada error, x explain error tu mcm local	
+--------------------------------------------------------------------------
+echo + execute html tag
+ {{!! <p> contoh </p> !!}}
+ 
+ cthya value kat table adalah <p>saya suka makan</p>
+ bila pakai {!! !!} dia tak paparkanlah <p> tu
+
+--------------------------------------------------------------------------
+Route model binding
+  Ada list of data.
+  Click salah satu, slalunya dia tarik by id.
+  Pakai route model binding, dia tarik by mana2 field.
+
+Route::get('posts/{post:slug}')
+  post – model Post
+  slug – field slug
+
+ 
+  1)fetch row by id
+ 
+      Route::get('path/{cth}',[])
+ 
+      index(Model $cth){
+	    return view('cth', [
+		  "cth"=>$cth
+		]);
+	  }  
+	  
+	cth kat url   /post/1
+	
+	//so if dlm {} ada satu value je, kita nak fetch data by id
+	
+	
+	
+  2)fetch row by field selain id (route model binding)
+
+       Route::get('path/{cth:fieldName}',[])
+
+       index(Model $cth){
+	    return view('cth', [
+		  "cth"=>$cth
+		]);
+	  }  
+	   
+    cth kat url    /post/ali
+	
+	//so if dlm {} ada ':' , kita nak fetch data by field
+	
+--------------------------------------------------------------------------
+WildCard (juga dipanggil route parameter)       {}
+  Kalau GET method, ada query string kat hujung url.
+    Query string tu dia tunjuk key dgn value.
+  Utk wildcard, dia tnjuk value shj.
+  cth: blabla/posts/ali
+
+Route::get('path/{cth}', function($cth){
+
+});
+
+// value $cth adalah value wildcard
+      $cth = {cth}  
+
+
+lebih drpd 1 wildcard:
+Route::get('path/{cth}/{cth2}', function($cth, $cth2){
+
+});	
+
+--------------------------------------------------------------------------
+query scope
+  method kat model dimana kita buat query sendiri yg kita boleh guna berulang kali
+  nama method tu bermula dgn scope utk bagitau dia tu adalah query scope. cthnya scopeFilter 
+  
+  jenis
+    local
+	global
+
+      
+
+--------------------------------------------------------------------------
+Upload img
+  $request->file('img')->store('post-images')
+
+  post-images. — nama folder
+  Kita store img yg diupoload dlm folder ni
+  Location dia
+     storage>app>public>post-images  //nanti tgk balik
+
+supaya boleh select img dlm folder ni, kena linkkan dia dgn folder public yg kat root tu.
+Sebab kita hanya boleh select img dlm folder tu shj.
+Cara link
+    pa storage:link
+	//folder storage akan muncul dlm folder public kat root. folder ni adalah jelmaan folder storage tmpat asal img di masukkan.
+	
+	
+return path image yg di upoload
+  return $request->file('image')->store('post-images');    
+  //post-images tu nama folder yg kita baru create 	
+	
+--------------------------------------------------------------------------
+Middleware
+-inspect & filtering HTTP requests entering your application.
+-ada middleware yg verifies the user of your application is authenticated.
+   authenticated = boleh access view tu
+-if the user is not authenticated, the middleware will redirect the user to login screen.
+
+ cth - Dapatkan access ke view
+   Route::resource(/cth,cthctroller)->except('create')->middleware('admin')
+    //Admin boleh acces smua view yg terhasil drpd route resource ni kecuali view route yg run function create()
+
+middleware ni ada ditengah2. sebab tu nama dia middleware
+  Route::get('/login', [LoginController::class, 'index'])->middleware('guest');
+  //middleware berlaku selepas /login, sebelum LoginController. so dia kat middle lah.
+
+ada byk middleware yg dah run by default. cthnya auth dgn guest
+   auth – user dah login
+   guest – user belum login
+  list middleware yg dah run by default tengok kat:  app>Http>Kernel.php 
+
+Route::get('/login', [LoginController::class, 'index'])->middleware('guest');
+  if user dah login, by default dia akan redirect to /home
+  if nak tukar, go to app>Providers>RouteServiceProvider.php
+
+----------------------------
+@auth
+  if dah login do this
+@else
+  do this
+@endauth
+----------------------------
+@guest
+    if belum login do this
+@endguest
+----------------------------
+
+if dah login, terus boleh pakai method auth() kat mana2 page pun
+cth kat view homepage:
+<h3>welcome, {{ auth()->user()->name }}</h3>
+
+
+--------------------------------------------------------------------------
+authentication vs authorization
+  authentication - user dah login. so boleh access page yg hanya boleh diaccess bila dah login
+  authorization - user dah login dan belum login boleh access page tu.
+                - tapi hanya yg authorize shj boleh access some part of that page.
+
+--------------------------------------------------------------------------
+Authorization
+ Laravel provides two primary ways of authorizing actions: 
+  1. gates
+      Gates are most applicable to actions that are not related to any model or resource, such as viewing an administrator dashboard. 
+  2. policies
+      policies should be used when you wish to authorize an action for a particular model or resource.
+	  
+ //pakai gates utk guna basic laravel authentication features.
+ //pakai policies utk laravel app yg complex
+  contohnya ada byk jenis user - moderator, author, admin, superadmin, dll
+  
+
+	  
+ ---------- 
+ gates: 
+ ----------
+  gate = permission
+  Cthnya pada view yg sama, admin boleh access mcm2 menu, tapi user lain takleh.
+    1.Set gate kat AppServiceProvider
+    2.can('admin')
+         //Bhgian yg admin shj bleh access
+      endcan()
+
+-----------
+
+  role and permission
+    role - kat laravel disebut sbgai policies
+	
+	
+--------------------------------------------------------------------------
+Request class
+
+ HTTP request = cara client side & berhubung dgn server side.
+  request nak masukkan, fetch, edit, delete data. dll
+  
+  methods - get, post, put, delete, dll
+           //melalui method ni, server faham apa yg client request
+		   
+   POST   - create new data
+   GET    - retrieve data shj
+          - ada query string kat url
+		  - guna method ni la kat form utk serch data.
+   PUT    - update existing data
+   DELETE - Delete lerr
+   
+   CRUD = create read update delete = post get put delete
+
+  
+  
+Laravel Request class
+ methods:
+   1. request()
+       request()  --- access all data 
+	   request('field')  --- access specific data
+ 
+ 
+ 
+ 
+ 
+ cth kegunaan:
+   1. access query string kat url
+     	if(request('category')){
+          $categori = Category::firstWhere('slug', request('category'));
+          $title = ' All posts in ' . $categori->name;
+        }
+   
+                      
+  
+
+     Cara laravel      1. $request->get(‘name’)      Shortcut:  $request->name
+                       2. request(‘name’)
+					   
+		   
+
+
+
+				   
+//cara tulis method request, pakai variable $request
+function cth (Request $request){
+ $name = $request->name;
+}
+
+//cara biasa tulis method request
+function cth (){
+ $name = request(‘name’);
+}
+
+
+--------------------------------------------------------------------------
+{{ $name ?? 'cth'}}
+  
+If name ada value, echo value tu
+If name xde value, echo cth
+
+--------------------------------------------------------------------------
+
+Make a variable optional
+   {{ $name }}            error if $name xde value
+   {{ $name ?? '' }}      x error
+
+--------------------------------------------------------------------------
+compact()
+
+  $name='abu';
+  Return view('cth', compact('name')
+
+// compact('name')  sama je dengan  ['name'=>$name] 
+   so compact tu mcm shortcut cara tulis
+
+--------------------------------------------------------------------------
+Route view() pun ada
+  Route::view('/','about',['name'=>$name];
+--------------------------------------------------------------------------
+Link  to public folder
+ Cth view :
+     folder/folder/folder/view.blade.php
+   Cara 1:
+  Just bubuh forward slash kat depan utk link to root public
+        <link href=/css/style.css> 
+    Cara 2:
+         <link href={{ asset('css/style.css') }}>
+        Cara ni, dia akan bagi full url
+        So  Pakai cara ni utk display img
+--------------------------------------------------------------------------
+Xpaham:
+  @component()
+  @slot()
+
+  html tag start with x:
+    <x-alert>
+    <x-slot>
+--------------------------------------------------------------------------
+@if($cth)           - error if xde value
+
+@isset($cth)     - x error if xde value
+
+--------------------------------------------------------------------------
+collection = array yg ada kuasa ajaib
+
+bila fetch data, data yg di select adalah dlm bentuk array. ha, array ni lah yg kita nak ubah jadi collection so kita boleh buat mcm2 dgn data tu.
+
+just pakai collect() utk jadikan array tu collection.
+  cth: collect($array)->map()
+
+cth collection methods: map(), avg(), count(), first(), firstWhere(),  danlain2
+       eloquent model pun ada first(), firstWhere().
+       yg ni lain. yg ni utk collection. rasanya
+
+--------------------------------------------------------------------------
+
+@dd() tu mcm var_dump() kat php lah. kita nk tgk value variable/array
+--------------------------------------------------------------------------
+when()   
+ The when method will execute the given callback when the first argument given to the method evaluates to true 
+ when tu sama je dgn if else. cuma when tu lebih ringkas
+ when adalah salah satu collection punya method
+--------------------------------------------------------------------------
+tendang
+
+ guest try access page yg auth shj boleh access,  by default redirect to route name(login).
+ if nak tukar, go to app>Http>Middleware>Authenticate.php
+
+--------------------------------------------------------------------------
+loops
+ @for  @foreach  @forelse  @while
+ 
+ @foreach ada $loop variable
+   $loop punya property:   iteration, first, last, count, dll
+   
+   cth kegunaan:
+    nombor menaik kat table	  
+	   <tr>
+	     <td>{{ $loop->iteration }}</td>
+	   </tr>
+
+--------------------------------------------------------------------------
+mass assignment
+ - filling a row with more than one column using an array of data.
+   = masukkan data, lebih drpd 1 column
+
+   Someone can easily masukkan unwanted data ke dlm form.
+   disebabkan security issue ni, do this:
+      fillable – what column allowed to be inserted  
+      atau
+      guarded  - can't insert to that particular column. 
+--------------------------------------------------------------------------
+null coalescing operator
+  dicipta utk gantikan ternary operator + isset
+
+  ternary operator + isset   ---    isset($filters['search']) ? $filters['search'] : false
+  
+  null coalescing operator   ---    $filters['search'] ?? false 
+
+--------------------------------------------------------------------------
+
+http client
+ get data from api. cthnya ig api, fb api, google api, ikea api, dll
+ data tu dlm bentuk JSON
+ laravel ada Guzzle HTTP client, allowing u to quickly make outgoing HTTP requests to communicate with other web app
+ so tiap kali buat http client, Guzzle lah yg handle
+ 
+ cth:
+  
+  kat controller
+  ------------------------
+    use Illuminate\Support\Facades\Http;
+	
+	function index(){
+       $collection = Http::get("https://jsonplaceholder.typicode.com/posts")->collect();
+       return view('testhttpclient', ['jsonn'=>$collection]);
+    }	
+  
+    kat view
+   ---------------------
+    <table>
+		<tr>
+			<th>User ID</th>
+			<th>ID</th>
+			<th>Title</th>
+			<th>Body</th>
+		</tr>
+		@foreach($jsonn as $json)
+		   <tr>
+			<td>{{ $json['userId'] }}</td>
+			<td>{{ $json['id'] }}</td>
+			<td>{{ $json['title'] }}</td>
+			<td>{{ $json['body'] }}</td>
+		   </tr>
+		@endforeach
+    </table>
+	
+	 ---------------------
+		
+--------------------------------------------------------------------------
+Blade
+ kelebihan echo blade berbanding echo php biasa:
+   Blade's {{ }} echo statements are automatically sent through PHP's htmlspecialchars function to prevent XSS attacks. (cross site scripting attacks)
+     xss attacks = malicious scripts are injected into web, generally in the form of a browser side script.
+	 attacker buh script kat form. because browser thinks the script came from a trusted source, the malicious script can access any cookies, session tokens, or other sensitive information retained by the browser and used with that site.
+
+ storage> framework> views  //kat sini ada file views blade yg dah dicompile jadi php biasa.
+ 
+--------------------------------------------------------------------------
+layouting system:
+
+layouts>main.blade.php 
+  <head>
+    <link>
+    <title></title>
+  </head>
+
+  <body>
+    @include('partials.navBar')
+    @yield('container')
+
+    <script></script>
+  </body>
+
+
+
+ cth.blade.php 
+  @extends('layouts.main')
+
+  @section('container')
+  @endsection 
+  
+--------------------------------------------------------------------------
+
+@dd($blabla)
+ dump and die.
+ tgk isi variable/object/array
+ die maksudnya hentikan semua code yg ada setelah @dd() ni.
+
+--------------------------------------------------------------------------
+slug
+ ada list of posts. kita click salah satu, dia gi lah ke post tu. 
+ gantikan select row by id
+ 
+ cth field:
+  title: Saya Suka Makan
+  slug: saya-suka-makan
+
+--------------------------------------------------------------------------
+.env
+ environment hanya utk developer. org lain xleh tengok
+.env.example 
+ hanyalah sebuah template. 
+ application kita pakai .env   bukan .env.example
+.gitignore
+ bila push application ke github, file2 yg tersenarai dlm .gitignore ni dia tak push.
+ .env tersenarai dlm .gitignore
+so nanti bila project day deploy, kena bubuh sendiri lah .env kat server tu.
+ 
+ 
+dalam .env
+ APP_ENV=local              //tgh buat sistem
+ APP_ENV=production         //siap utk di release. so bila ada error dia tak terangkan error selengkap mcm local.
+ 
+ //app environment ada : local, development, production 
+
+--------------------------------------------------------------------------
+AppServiceProvider.php
+  dlm file ni, boleh set paginator, gate, dll
+  
+  cth:
+   use Illuminate\Pagination\Paginator;
+   use Illuminate\Support\Facades\Gate;
+   
+   Paginator::useBootstrap();
+   Gate::define('admin', function(User $user) {
+         //kalau return 1, user is admin lah
+         return $user->is_admin;
+   });
+  
+
+--------------------------------------------------------------------------
+upload img
+
+ $request->file('image')->store('post-images');   //kita yg bagi nama post-images tu
+ bila upload image, image masuk ke folder post-images tu
+ by default location dia adalah    storage/app/post-images
+ so kita kena masukkan FILESYSTEM_DRIVER=public  kat .env 
+ supaya location dia jadi storage/app/public/post-images
+ 
+ pastu kena buat pa storage:link  utk link kan folder ni kpd folder public/images
+  so nanti kat pubic/images tu akan ada folder storage/folder-images
+
+--------------------------------------------------------------------------
+
+@csrf = cross site request forgery
+  <form action='url web kita'>
+     <input value='malicious script'>
+  </form>
+
+
+Laravel automatically generates a CSRF token for each active user session.
+this token used to verify that the authenticated user is the person actually making the requests.
+since this token is stored in the user's session and changes each time the session is regenerated, a malicious application is unable to access it.
+
+
+bila bubuh @csrf kat form, laravel automacally convert dia jadi ni:
+  <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+  
+ so bila submit form tu, laravel cek lah token kat form tu sama tak dgn token session.
+ if token tak sama or takde token, dia tak bagi masuk lah data tu ke dlm db.  
+--------------------------------------------------------------------------
+Route::resource('/staf', StafController::class);
+
+   get      index()                                    return view show all staf         <a href="/staf">Home</a> 
+   get      show()                                     return view show 1 staf           <a href="/staf/show">view</a>   //nanti tgk cara guna dia
+   
+   get      create()                                   return view to insert 1 staf      <a href="/staf/create">Create</a>  
+   get      edit(Staf $staf)	                       return view to edit 1 staf        <a href="/staf/{{ $staf->id }}/edit">EDIT</a>  
+
+   post     store(Request $request)                    insert  1 staf into db             submit <form action="/staf">     
+   put      update(Request $request, Staf $staf)       update 1 staf in db               submit <form action="/staf/{{ $staf->id }}">    //dlm form ada @method(‘PUT’)  
+   delete   destroy($id)                               delete 1 staf in db               submit <form action="/staf/{{ $staf->id }}">    //dlm form ada @method(‘DELETE’)  
+--------------------------------------------------------------------------
+  
+laravel vite plugin
+  at least laravel version 9.19	
+  when u modify front end, the change will happen instantly without loosing the state of application = hot module replacement (HMR) 
+	 cthnya bila modify css/js/html  dia terus update kat browser. 
+	 state cthnya 'count is:23' tak berubah. dia takda tiba2 berubah 'jadi count is:0'
+	 
+  command utk install:
+    npm install --save-dev vite laravel-vite-plugin
+      vite.config.js   muncul kat root folder
+	  
+	link css/js kat view kena buat camni:
+       @vite(['resources/css/app.css', 'resources/js/app.js'])
+	   bukan <link rel="stylesheet" href="css/main.css">
+	   
+	p/s: file css/js/bootstrap yg vite track adalah file yg kat dlm folder resources. bukan folder public
+	      sandika ada ckp folder resources adalah utk bundling.
+		  
+		  tapi image masih kat folder public
+		  
+		  
+	   
+	wajib   npm run dev   kalu tak php artisan serve tak berfungsi   
+--------------------------------------------------------------------------
+
+dump() output the results and then continues processing. 
+dd() output the results and stops the process immediately
+
+--------------------------------------------------------------------------
+
+Methods
+ mt_rand(1,3)  random num 1 sampai 3
+
+--------------------------------------------------------------------------
+how to	
+
+<title>{{ $title }}</title>  //set title kat routing
+------------------------
+highlight current page (kat navbar)
+ <a class="{{ ($title==='Home'? 'active': '') }}"  href="/">Home</a>
+
+
+
+
+
+user authentication:
+ registration
+ login
+ session
+ password reset
+ access permission
+
+
+laravel make authentication very easy to use and understand
+
+laravel project always have create_user_migration table  and the user model
+
+registration system and login  - boleh pakai bootstrap or tailwind.
+
+tailwind = css framework, mcm bootstrap
+
+composer - install and manage php packages
+
+scaffolding:
+ a temporary structure on the outside of a building, made of wooden 
+ planks and metal poles, used by workmen while building, repairing, or cleaning the building.
+//alah yg construction worker panjat masa buat bangunan tu
+//utk laravel ni dia = rangka gitu 
+
+laravel scaffolding:
+ The term Scaffolding roughly aims to a quickly set up skeleton for an app or your project. 
+ The main purpose of Scaffolding is to speed your workflow rather than creating it new.
+
+bootsrtrap scaffolding:
+ Scaffold is a modern and fresh HTML website template built with bootstrap framework. It's awesome and creative responsive HTML5 
+ template created for business, corporate, portfolio, startup and agency websites. It is a very simple, clean and professionally 
+ for showcasing your work or services.
+
+laravel 8 pakai fortify utk frond end ui
+
+composer digunakan utk install pelbagai packages yg ada kat dlm dunia ni.
+laravel installer adalah sebuah package.kita pakai composer utk install package ni. 
+laravel installer ni lah yg digunakan utk create new laravel project.
