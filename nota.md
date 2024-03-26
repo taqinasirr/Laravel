@@ -18,3 +18,30 @@ pa tinker
 pa list
 
 ```
+
+
+```php
+Ayam::create()
+
+Ayam::all()
+Ayam::get()
+Ayam::latest()->get()
+Ayam::latest()->paginate(5)
+Ayam::with()
+Ayam::find(1)
+Ayam::findOrFail(2)
+Ayam::firstWhere()
+Ayam::where()->first()
+Ayam::where->get()
+
+Ayam::where('x', '=', 'y')
+Ayam::where('x', 'y')
+Ayam::where('x', '>', '10')
+
+Post::where('id', $post->id)->update($validatedData)
+$row()->update()
+
+$row->delete()
+destroy(1,2,3)
+```
+
