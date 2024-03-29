@@ -1,3 +1,8 @@
+
+`cara 1`
+---------
+
+
 ### 1) Set faker kat factory
 
    i) UserFactory.php 
@@ -37,7 +42,28 @@ pa migrate:fresh --seed   (if nak fresh)
 	
 <br><br>
 
+`cara2`
+-----------
 
+terus buat faker kat file seeder tanpa pergi ke file factory
+
+```php
+public function run(): void
+{
+    $faker = \Faker\Factory::create('id_ID');
+    for($i = 0; $i <10; $i++){
+        Buku::create([
+            'judul'=>$faker->sentence,
+            'pengarang'=>$faker->name,
+            'tanggal_publikasi'=>$faker->date,
+        ]);
+    }
+}
+```
+
+
+
+<br><br>
 ___
 defaut password utk user adalah ‘password’  
 Seeder = a special class used to generate and insert sample data (seeds) in a database.  
